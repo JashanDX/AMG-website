@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Astro Mountain Guy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --sky: #030712;
+      --deep: #050d1f;
+      --accent: #7dd3fc;
+      --accent2: #c084fc;
+      --gold: #fbbf24;
+      --muted: #94a3b8;
+      --surface: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      position: relative;
+      background: none;
+      color: #e2e8f0;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Animated gradient background behind page content */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      opacity: 0.96;
+      background: linear-gradient(120deg, #001021 0%, #1e3f16 25%, #3a6a9c 50%, #0b1840 75%, #051526 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 25s ease infinite;
+    }
+
+    /* Low-opacity image overlay for subtle stardust effect */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: url("https://i.ibb.co/DH6wkVQL/Aries-Science-Center.jpg") center bottom 35%/cover no-repeat;
+      opacity: 14.5%;
+      mix-blend-mode: screen;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Custom cursor */
+    .cursor {
+      position: fixed; width: 10px; height: 10px;
+      background: var(--accent); border-radius: 50%;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      transition: transform 0.1s, background 0.3s;
+      mix-blend-mode: screen;
+    }
+    .cursor-ring {
+      position: fixed; width: 36px; height: 36px;
+      border: 1px solid rgba(255, 255, 255, 0.925); border-radius: 50%;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: transform 0.15s ease, width 0.3s, height 0.3s;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1.2rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      backdrop-filter: blur(20px);
+      background: rgba(3,7,18,0.6);
+      border-bottom: 0.5px solid var(--border);
+      transition: background 0.4s;
+    }
+    .nav-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--muted);
+      font-size: 0.85rem; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color 0.3s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+      height: 1px; background: var(--accent);
+      transform: scaleX(0); transition: transform 0.3s;
+    }
+    .nav-links a:hover { color: #fff; }
+    .nav-links a:hover::after { transform: scaleX(1); }
+
+    /* HERO */
+    #hero {
+      position: relative; height: 100vh; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Stars canvas */
+    #stars-canvas {
+      position: absolute; inset: 0; z-index: 0;
+    }
+
+    /* Mountain silhouette */
+    .mountains {
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+    }
+
+    /* Aurora glow */
+    .aurora {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 40% at 20% 60%, rgba(124,58,237,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 30% at 80% 70%, rgba(6,182,212,0.1) 0%, transparent 70%);
+      animation: aurora-shift 5s ease-in-out infinite alternate;
+    }
+    @keyframes aurora-shift {
+      from { opacity: 0.6; transform: scaleX(1); }
+      to   { opacity: 1;   transform: scaleX(1.08); }
+    }
+
+    .hero-content {
+      position: relative; z-index: 3;
+      text-align: center;
+      animation: fade-up 1.2s ease both;
+    }
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.7rem; letter-spacing: 0.35em;
+      color: var(--accent); text-transform: uppercase;
+      margin-bottom: 1.2rem; opacity: 0.9;
+    }
+    .hero-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2.4rem, 7vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      background: linear-gradient(135deg, #fff 20%, var(--accent) 60%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.6rem;
+    }
+    .hero-sub {
+      font-size: clamp(0.85rem, 2vw, 1.1rem);
+      color: var(--muted); font-weight: 300;
+      letter-spacing: 0.06em; margin-bottom: 2.5rem;
+    }
+    .hero-sub span { color: var(--gold); font-weight: 500; }
+
+    .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      padding: 0.75rem 2rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem; font-weight: 500;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      border-radius: 2px;
+      text-decoration: none; cursor: none;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: var(--accent); color: #000;
+      border: none;
+    }
+    .btn-primary:hover { background: #fff; transform: translateY(-2px); }
+    .btn-ghost {
+      background: transparent; color: var(--accent);
+      border: 1px solid rgba(125,211,252,0.4);
+    }
+    .btn-ghost:hover { background: rgba(125,211,252,0.1); transform: translateY(-2px); }
+
+    .scroll-hint {
+      position: absolute; bottom: 7rem; left: 50%;
+      transform: translateX(-50%); z-index: 3;
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+    }
+    .scroll-hint span { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+    .scroll-line {
+      width: 1px; height: 50px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: scroll-drop 2s ease-in-out infinite;
+    }
+    @keyframes scroll-drop {
+      0%,100% { opacity: 0; transform: translateY(-10px); }
+      50%      { opacity: 1; transform: translateY(0); }
+    }
+
+    /* SECTIONS */
+    section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+    .section-tag {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.65rem; letter-spacing: 0.35em;
+      color: var(--accent); text-transform: uppercase;
+      margin-bottom: 1rem; display: block;
+    }
+    h2.section-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700; color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .section-desc {
+      color: var(--muted); max-width: 520px;
+      line-height: 1.8; font-size: 0.95rem; margin-bottom: 3rem;
+    }
+
+    /* ABOUT */
+    #about { padding-top: 8rem; }
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 4rem; align-items: start; margin-top: 2rem;
+    }
+    .about-text p { color: var(--muted); line-height: 1.9; font-size: 0.95rem; margin-bottom: 1rem; }
+    .about-text strong { color: #e2e8f0; }
+
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+    .tag {
+      padding: 0.35rem 0.8rem;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 2px;
+      font-size: 0.78rem; color: var(--muted);
+      letter-spacing: 0.05em;
+      transition: all 0.3s;
+    }
+    .tag:hover { border-color: var(--accent); color: var(--accent); }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .stat-card {
+      padding: 1.5rem;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 4px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .stat-card:hover { border-color: rgba(125,211,252,0.4); transform: translateY(-3px); }
+    .stat-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 2rem; font-weight: 700; color: var(--accent);
+      display: block; margin-bottom: 0.3rem;
+    }
+    .stat-label { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.05em; }
+
+    /* PROJECTS */
+    #projects { border-top: 0.5px solid var(--border); }
+    .projects-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem; margin-top: 1rem;
+    }
+    .project-card {
+      padding: 2rem;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 4px;
+      position: relative; overflow: hidden;
+      transition: all 0.4s;
+      cursor: none;
+    }
+    .project-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .project-card:hover { transform: translateY(-6px); border-color: rgba(125,211,252,0.2); }
+    .project-card:hover::before { opacity: 1; }
+    .project-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.65rem; color: var(--accent);
+      letter-spacing: 0.2em; margin-bottom: 1rem; display: block;
+    }
+    .project-title {
+      font-size: 1.1rem; font-weight: 700; color: #fff;
+      margin-bottom: 0.75rem;
+    }
+    .project-desc { font-size: 0.87rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; }
+    .project-stack { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .stack-pill {
+      padding: 0.25rem 0.6rem;
+      background: rgba(125,211,252,0.08);
+      border: 0.5px solid rgba(125,211,252,0.2);
+      border-radius: 2px;
+      font-size: 0.72rem; color: var(--accent); font-family: monospace;
+    }
+
+    /* ASTRONOMY */
+    #astronomy { border-top: 0.5px solid var(--border); }
+    .astro-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem; margin-top: 1rem;
+    }
+    .astro-card {
+      padding: 1.75rem;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 4px;
+      transition: all 0.4s;
+    }
+    .astro-card:hover { border-color: rgba(192,132,252,0.4); transform: translateY(-4px); }
+    .astro-icon { font-size: 2rem; margin-bottom: 1rem; display: block; }
+    .astro-title { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+    .astro-text { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+
+    /* CONTACT */
+    #contact { border-top: 0.5px solid var(--border); text-align: center; }
+    #contact .section-desc { margin: 1rem auto 2.5rem; }
+    .contact-links { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+    .contact-link {
+      padding: 0.85rem 1.8rem;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 4px;
+      text-decoration: none; color: var(--muted);
+      font-size: 0.85rem; letter-spacing: 0.06em;
+      transition: all 0.3s; cursor: none;
+    }
+    .contact-link:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-3px); }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 2rem;
+      border-top: 0.5px solid var(--border);
+      color: var(--muted); font-size: 0.78rem;
+      letter-spacing: 0.08em;
+    }
+    footer span { color: var(--accent); }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 700px) {
+      .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#hero" class="nav-logo">AMG</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#astronomy">Astronomy</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <canvas id="stars-canvas"></canvas>
+    <div class="aurora"></div>
+
+    <div class="hero-content">
+      <p class="hero-label">// Developer &amp; Stargazer</p>
+      <h1 class="hero-title">Astro<br/>Mountain<br/>Guy</h1>
+      <p class="hero-sub">B.Tech Engineer · <span>Stargazer</span> · Explorer</p>
+      <div class="hero-btns">
+        <a href="#projects" class="btn btn-primary">View Projects</a>
+        <a href="#about" class="btn btn-ghost">About Me</a>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <span>scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+
+    <!-- Mountain SVG -->
+    <svg class="mountains" viewBox="0 0 1440 280" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Far range -->
+      <polygon points="0,280 0,200 180,100 300,160 450,80 600,150 700,110 820,170 950,90 1100,155 1250,95 1380,140 1440,120 1440,280" fill="#0a1628" opacity="0.8"/>
+      <!-- Mid range with snow peaks -->
+      <polygon points="0,280 0,240 100,180 200,200 320,130 380,150 460,100 540,140 620,120 700,160 780,115 860,155 940,105 1020,150 1100,130 1200,170 1320,125 1440,160 1440,280" fill="#0d1f3c"/>
+      <!-- Front range - darkest -->
+      <polygon points="0,280 0,260 80,220 160,250 240,210 340,240 400,200 480,230 560,210 640,245 720,215 800,250 900,220 1000,255 1100,225 1200,260 1300,235 1440,260 1440,280" fill="#030712"/>
+      <!-- Snow caps -->
+      <polygon points="320,130 340,120 360,130 380,150" fill="rgba(255,255,255,0.12)"/>
+      <polygon points="460,100 480,88 500,102 520,140" fill="rgba(255,255,255,0.1)"/>
+      <polygon points="780,115 800,103 820,118 840,155" fill="rgba(255,255,255,0.12)"/>
+      <polygon points="940,105 960,94 980,108 1000,150" fill="rgba(255,255,255,0.09)"/>
+    </svg>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <span class="section-tag">// 01 &nbsp; About</span>
+    <h2 class="section-title">Who Am I?</h2>
+    <div class="about-grid reveal">
+      <div class="about-text">
+        <p>Hey! I'm <strong>Jashandeep Singh</strong> with a deep fascination for the cosmos and a love for trekking mountain trails under open skies. I bridge the world of <strong>engineering</strong> with the quiet wonder of stargazing.</p>
+        <p>By day I write code and solve problems. By night I shoot starry photos, share my observations and chase dark sky spots on mountain ridges where light pollution can't reach.</p>
+        <p>This site is my corner of the internet — tech/projects, ideas and the occasional photo from <strong>1,466 feet above sea level</strong>. Moreover a portfolio of my work and experiences.</p>
+        <div class="skill-tags">
+          <span class="tag">C / C++</span>
+          <span class="tag">Python</span>
+          <span class="tag">Data Structures</span>
+          <span class="tag">Web Dev</span>
+          <span class="tag">Astrophotography</span>
+          <span class="tag">Trekking</span>
+          <span class="tag">Linux</span>
+          <span class="tag">Embedded Systems/IoT</span>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-num">2nd</span>
+          <span class="stat-label">Year B.Tech</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">2+</span>
+          <span class="stat-label">Treks Completed</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">∞</span>
+          <span class="stat-label">Stars Observed</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">2</span>
+          <span class="stat-label">Projects Built</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <span class="section-tag">// 02 &nbsp; Projects</span>
+    <h2 class="section-title">What I've Built</h2>
+    <p class="section-desc">A mix of coursework, personal experiments, and crazy ideas born during nights in the mountains.</p>
+    <h3>COMING SOON! Stay tuned </h3>
+    <!--<div class="projects-grid">
+      <div class="project-card reveal">
+        <span class="project-num">01 —</span>
+        <h3 class="project-title">Star Tracker App</h3>
+        <p class="project-desc">A mobile-first web app that identifies constellations using device orientation and a real star catalog. Built during a solo Himalayan trek.</p>
+        <div class="project-stack">
+          <span class="stack-pill">JavaScript</span>
+          <span class="stack-pill">WebGL</span>
+          <span class="stack-pill">NASA API</span>
+        </div>
+      </div>
+      <div class="project-card reveal">
+        <span class="project-num">02 —</span>
+        <h3 class="project-title">Trek Route Planner</h3>
+        <p class="project-desc">A route optimization tool for mountain treks, factoring in altitude gain, weather windows, and rest-stop locations using graph algorithms.</p>
+        <div class="project-stack">
+          <span class="stack-pill">Python</span>
+          <span class="stack-pill">Dijkstra</span>
+          <span class="stack-pill">OpenMap</span>
+        </div>
+      </div>
+      <div class="project-card reveal">
+        <span class="project-num">03 —</span>
+        <h3 class="project-title">IoT Weather Station</h3>
+        <p class="project-desc">Solar-powered ESP32 weather station deployable at remote altitude sites. Logs temperature, humidity and sends data over LoRa.</p>
+        <div class="project-stack">
+          <span class="stack-pill">ESP32</span>
+          <span class="stack-pill">LoRa</span>
+          <span class="stack-pill">C++</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ASTRONOMY -->
+  <section id="astronomy">
+    <span class="section-tag">// 03 &nbsp; Astronomy</span>
+    <h2 class="section-title">Under the Stars</h2>
+    <p class="section-desc">Some things I chase in the night sky — from mountain tops where the Milky Way is so bright it casts shadows.</p>
+    <div class="astro-grid">
+      <div class="astro-card reveal">
+        <span class="astro-icon">🔭</span>
+        <h3 class="astro-title">Deep Sky Objects</h3>
+        <p class="astro-text">Nebulae, galaxies, and star clusters. I sketch objects through my 8" Dobsonian when the sky transparency allows.</p>
+      </div>
+      <div class="astro-card reveal">
+        <span class="astro-icon">📸</span>
+        <h3 class="astro-title">Astrophotography</h3>
+        <p class="astro-text">Long exposures from Himalayan peaks above 10,000 ft. No light pollution, just the naked cosmos and a cold tripod.</p>
+      </div>
+      <div class="astro-card reveal">
+        <span class="astro-icon">🌌</span>
+        <h3 class="astro-title">Milky Way Season</h3>
+        <p class="astro-text">Tracking the galactic core window every March–September. Planning treks around new moon phases for maximum sky darkness.</p>
+      </div>
+      <div class="astro-card reveal">
+        <span class="astro-icon">🛰️</span>
+        <h3 class="astro-title">Satellite Passes</h3>
+        <p class="astro-text">Logging ISS and Starlink passes. Cross-referencing orbital data with my trek locations for planned naked-eye observations.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <span class="section-tag">// 04 &nbsp; Contact</span>
+    <h2 class="section-title">Say Hello</h2>
+    <p class="section-desc">Whether it's a project collaboration, a stargazing spot recommendation, or just a fellow B.Tech grind — reach out.</p>
+    <div class="contact-links">
+      <a href="mailto:astrofrontyardcosmos@email.com" class="contact-link">✉ Email</a>
+      <a href="https://github.com/JashanDX" class="contact-link">⌥ GitHub</a>
+      <a href="https://www.linkedin.com/in/jashandeep-singh-889b10241/" class="contact-link">in LinkedIn</a>
+      <a href="https://autocv-f4e010.tiiny.site" class="contact-link">★ Resume</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>Crafted by <span>Astro Mountain Guy</span> · from somewhere under a clear sky</p>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursor-ring');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top  = e.clientY + 'px';
+      ring.style.left   = e.clientX + 'px';
+      ring.style.top    = e.clientY + 'px';
+    });
+
+    // Stars
+    const canvas = document.getElementById('stars-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    function resize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+      stars = [];
+      for (let i = 0; i < 300; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.4 + 0.2,
+          a: Math.random(),
+          da: (Math.random() - 0.5) * 0.004
+        });
+      }
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.a = Math.max(0.05, Math.min(1, s.a + s.da));
+        if (s.a <= 0.05 || s.a >= 1) s.da *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${s.a})`;
+        ctx.fill();
+      });
+      // Shooting star occasionally
+      if (Math.random() < 0.002) {
+        const sx = Math.random() * canvas.width * 0.8;
+        const sy = Math.random() * canvas.height * 0.4;
+        const grad = ctx.createLinearGradient(sx, sy, sx + 120, sy + 60);
+        grad.addColorStop(0, 'rgba(125,211,252,0.8)');
+        grad.addColorStop(1, 'transparent');
+        ctx.strokeStyle = grad; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + 120, sy + 60);
+        ctx.stroke();
+      }
+      requestAnimationFrame(drawStars);
+    }
+    drawStars();
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Parallax on hero mountains
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      document.querySelector('.mountains').style.transform = `translateY(${y * 0.3}px)`;
+      document.querySelector('.aurora').style.transform    = `translateY(${y * 0.1}px)`;
+    });
+  </script>
+</body>
+</html>
