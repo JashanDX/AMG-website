@@ -21,6 +21,39 @@ body {
   cursor: none;
 }
 
+
+ /* Low-opacity image overlay for subtle stardust effect */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: url("https://i.ibb.co/DH6wkVQL/Aries-Science-Center.jpg") center bottom 35%/cover no-repeat;
+      opacity: 14.5%;
+      mix-blend-mode: screen;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+ /* Animated gradient background behind page content */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      opacity: 0.96;
+      background: linear-gradient(120deg, #001021 0%, #884e6062 25%, #3a6a9c 50%, #0b1840 75%, #051526 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 25s ease infinite;
+    }
+
+
+
+
 /* ─── Custom Cursor ─── */
 .cursor {
   position: fixed; width: 10px; height: 10px;
@@ -87,7 +120,7 @@ nav {
   background:
     radial-gradient(ellipse 80% 40% at 20% 60%, rgba(124,58,237,0.12) 0%, transparent 70%),
     radial-gradient(ellipse 60% 30% at 80% 70%, rgba(6,182,212,0.1) 0%, transparent 70%);
-  animation: aurora-shift 12s ease-in-out infinite alternate;
+  animation: aurora-shift 5s ease-in-out infinite alternate;
 }
 @keyframes aurora-shift {
   from { opacity: 0.6; transform: scaleX(1); }
